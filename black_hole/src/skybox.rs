@@ -1,4 +1,4 @@
-use crate::{Vec4, PI};
+use crate::{Vec4};
 use crate::views::Color;
 
 pub struct Skybox {

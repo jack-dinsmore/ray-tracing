@@ -114,9 +114,9 @@ impl<C> Photon<C> where C: Christoffels  {
 }
 
 fn main() {
-    let pos = [1.0, PI / 2.0, 0.0];// r, theta, phi
+    let pos = [10.0, PI / 2.0, 0.0];// r, theta, phi
 
-    let mut plane: views::ViewLine<metrics::Minkowski3> = views::ViewLine::<metrics::Minkowski3>::new(
+    let mut plane: views::ViewLine<metrics::Schwarzschild3> = views::ViewLine::<metrics::Schwarzschild3>::new(
         pos, [-2.0, 0.0, 0.0], [0.0, 0.0, 1.0], 640, 480);
     
     let dtau = 1e-3;

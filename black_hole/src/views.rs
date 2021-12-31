@@ -171,7 +171,7 @@ impl<C> ViewLine<C> where C: Christoffels {
                 return true;
             }
         }
-        println!("Simul3ation did not succeed");
+        println!("Simulation did not succeed");
         false
     }
 }
@@ -225,6 +225,15 @@ impl<C> View<C> for ViewLine<C> where C: Christoffels + Send + std::fmt::Debug {
                 let radial_length = radial_length as usize;
                 let photon_below = &self.photons[radial_length];
                 let photon_above = &self.photons[radial_length + 1];
+
+                if let State::Dead = photon_below.state {
+                    line.push((0, 0, 0));
+                    continue;
+                }
+                if let State::Dead = photon_above.state {
+                    line.push((0, 0, 0));
+                    continue;
+                }
                 
                 let (below_pos, below_vel) = rotate_pos_vel(photon_below.pos, photon_below.vel, self.normal, psi);
                 let (above_pos, above_vel) = rotate_pos_vel(photon_above.pos, photon_above.vel, self.normal, psi);
@@ -342,6 +351,10 @@ impl<C> View<C> for ViewPlane<C> where C: Christoffels + Send + std::fmt::Debug 
             let mut line = Vec::new();
             for _ in 0..self.height {
                 let photon = self.photons.pop().expect("Photon list was too short");
+                if let State::Dead = photon.state {
+                    line.push((0, 0, 0));
+                    continue;
+                }
                 line.push(skybox.call(photon.pos, photon.vel));
             }
             pixels.push(line);
