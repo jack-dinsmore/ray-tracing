@@ -116,14 +116,14 @@ impl<C> Photon<C> where C: Christoffels  {
 fn main() {
     let pos = [10.0, PI / 2.0, 0.0];// r, theta, phi
 
-    let mut plane: views::ViewLine<metrics::Schwarzschild3> = views::ViewLine::<metrics::Schwarzschild3>::new(
+    let mut plane: views::ViewLine<metrics::MorrisThorne3> = views::ViewLine::<metrics::MorrisThorne3>::new(
         pos, [-2.0, 0.0, 0.0], [0.0, 0.0, 1.0], 640, 480);
     
     let dtau = 1e-3;
 
     plane.run(1_000_000, dtau);
 
-    let skybox = skybox::Skybox::blank();
+    let skybox = skybox::Skybox::demo();
     let image = plane.render(skybox);
     if let Err(_) = image.save("out.bmp") {
         println!("Image saving threw an error.");

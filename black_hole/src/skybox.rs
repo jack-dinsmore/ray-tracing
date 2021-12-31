@@ -6,7 +6,7 @@ pub struct Skybox {
 }
 
 impl Skybox {
-    pub fn blank() -> Skybox {
+    pub fn demo() -> Skybox {
         Skybox {color_fn: |pos: Vec4, _vel: Vec4| -> Color {
             let brightness = (1.0 - pos[2].cos().abs()).powf(4.0);
             let red = f64::sin(4.0 * pos[3]).powi(2);
@@ -14,8 +14,13 @@ impl Skybox {
             ((brightness * red * 255.0) as u8, (brightness * green * 255.0) as u8, 0)
         }}
     }
+    pub fn black() -> Skybox {
+        Skybox {color_fn: |_pos: Vec4, _vel: Vec4| -> Color {
+            (0, 0, 0)
+        }}
+    }
 
-    pub fn call(&self, pos: Vec4, vel: Vec4) -> Color{
+    pub fn call(&self, pos: Vec4, vel: Vec4) -> Color {
         (self.color_fn)(pos, vel)
     }
 }

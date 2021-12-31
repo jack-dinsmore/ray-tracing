@@ -21,7 +21,7 @@ pub struct ViewLine<C> {
 pub struct ViewPlane<C> {
     width: u32,
     height: u32,
-    pub photons: Vec<Photon<C>>,
+    photons: Vec<Photon<C>>,
 }
 
 pub struct ViewCube<C> {

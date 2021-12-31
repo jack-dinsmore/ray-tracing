@@ -5,6 +5,8 @@ use crate::{Christoffels, State, Vec4, Christoffel};
 
 const R_S : f64 = 0.2;
 
+const B_0: f64 = 1.0;
+
 #[derive(Debug)]
 pub struct Minkowski {}
 #[derive(Debug)]
@@ -13,6 +15,10 @@ pub struct Minkowski3 {}
 pub struct Schwarzschild {}
 #[derive(Debug)]
 pub struct Schwarzschild3 {}
+#[derive(Debug)]
+pub struct MorrisThorne {}
+#[derive(Debug)]
+pub struct MorrisThorne3 {}
 
 impl Christoffels for Minkowski {
     fn get_state(pos: Vec4) -> State {
@@ -82,7 +88,7 @@ impl Christoffels for Minkowski3 {
 
             0.0, 0.0, 0.0, 0.0,
             0.0, 0.0, 0.0, 0.0,
-            0.0, 0.0, -pos[1], 0.0,
+            0.0, 0.0, 0.0, 0.0,
             0.0, 0.0, 0.0, -pos[1],
 
             0.0, 0.0, 0.0, 0.0,
@@ -207,5 +213,99 @@ impl Christoffels for Schwarzschild3 {
             0.0, 1.0 / f, 0.0, 0.0,
             0.0, 0.0, r2, 0.0,
             0.0, 0.0, 0.0, r2)
+    }
+}
+
+impl Christoffels for MorrisThorne {
+    fn get_state(pos: Vec4) -> State {
+        if pos[0].abs() > 1e6 {
+            return State::Dead;
+        }
+        if pos[1].abs() > 20.0 {
+            return State::Escape;
+        }
+        State::Running
+    }
+
+    fn christoffel(pos: Vec4) -> Christoffel {
+        let st = pos[2].sin().abs();
+        let ct = pos[2].cos();
+        let quad = pos[1] / (B_0 * B_0 + pos[1] * pos[1]);
+        Christoffel::new([
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0,
+
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, -pos[1], 0.0,
+            0.0, 0.0, 0.0, -pos[1] * st * st,
+
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, quad, 0.0,
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, -st * ct,
+
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, quad,
+            0.0, 0.0, 0.0, ct / st,
+            0.0, 0.0, 0.0, 0.0,
+        ])
+    }
+
+    fn get_metric(pos: Vec4) -> Matrix4<f64> {
+        let st = pos[2].sin().abs();
+        let fake_r2 = B_0 * B_0 + pos[1] * pos[1];
+        Matrix4::new(
+            -1.0, 0.0, 0.0, 0.0,
+            0.0, 1.0, 0.0, 0.0,
+            0.0, 0.0, fake_r2, 0.0,
+            0.0, 0.0, 0.0, fake_r2 * st * st)
+    }
+}
+
+impl Christoffels for MorrisThorne3 {
+    fn get_state(pos: Vec4) -> State {
+        if pos[0].abs() > 1e6 {
+            return State::Dead;
+        }
+        if pos[1].abs() > 20.0 {
+            return State::Escape;
+        }
+        State::Running
+    }
+
+    fn christoffel(pos: Vec4) -> Christoffel {
+        Christoffel::new([
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0,
+
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, -pos[1],
+
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0,
+
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, pos[1] / (B_0 * B_0 + pos[1] * pos[1]),
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0,
+        ])
+    }
+
+    fn get_metric(pos: Vec4) -> Matrix4<f64> {
+        let fake_r2 = B_0 * B_0 + pos[1] * pos[1];
+        Matrix4::new(
+            -1.0, 0.0, 0.0, 0.0,
+            0.0, 1.0, 0.0, 0.0,
+            0.0, 0.0, fake_r2, 0.0,
+            0.0, 0.0, 0.0, fake_r2)
     }
 }
