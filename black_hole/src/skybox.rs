@@ -1,4 +1,4 @@
-use crate::{Vec4, Photon};
+use crate::{Vec4, PI};
 use crate::views::Color;
 
 pub struct Skybox {
@@ -8,14 +8,14 @@ pub struct Skybox {
 impl Skybox {
     pub fn blank() -> Skybox {
         Skybox {color_fn: |pos: Vec4, _vel: Vec4| -> Color {
-            let brightness = pos[2].sin();
-            let red = pos[3].sin().powi(2);
-            let green = pos[3].cos().powi(2);
+            let brightness = (1.0 - pos[2].cos().abs()).powf(4.0);
+            let red = f64::sin(4.0 * pos[3]).powi(2);
+            let green = f64::cos(4.0 * pos[3]).powi(2);
             ((brightness * red * 255.0) as u8, (brightness * green * 255.0) as u8, 0)
         }}
     }
 
-    pub fn call<C>(&self, photon: Photon<C>) -> Color{
-        (self.color_fn)(photon.pos, photon.vel)
+    pub fn call(&self, pos: Vec4, vel: Vec4) -> Color{
+        (self.color_fn)(pos, vel)
     }
 }

@@ -56,7 +56,7 @@ impl Christoffel {
         for mu in 0..4 {
             for alpha in 0..4 {
                 for beta in 0..4 {
-                    sum[mu] += self.get(mu, alpha, beta) * vel[alpha] * vel[beta];
+                    sum[mu] -= self.get(mu, alpha, beta) * vel[alpha] * vel[beta];
                 }
             }
         }
@@ -72,7 +72,6 @@ pub trait Christoffels {
 
 impl<C> Photon<C> where C: Christoffels  {
     pub fn new<T>(pos: Vec4, vel: Vec4) -> Photon<T> {
-        //println!("Pos: {:?}, Vel: {:?}", pos, vel);
         Photon {pos, vel, state: State::Running, phantom: PhantomData::<T> }
     }
 
@@ -84,7 +83,11 @@ impl<C> Photon<C> where C: Christoffels  {
             State::Dead => return &self.state,
         }
 
-        // Runge Kutta 4
+        let (dp1, dv1) = C::christoffel(self.pos).accel(self.vel);
+        self.pos = add(self.pos, mul(dp1, dtau));
+        self.vel = add(self.vel, mul(dv1, dtau));
+
+        /*// Runge Kutta 4
         let (dp1, dv1) = C::christoffel(self.pos).accel(self.vel);
         let (dp2, dv2) = C::christoffel(add(self.pos, mul(dp1, dtau / 2.0)))
             .accel(add(self.vel, mul(dv1, dtau / 2.0)));
@@ -94,7 +97,7 @@ impl<C> Photon<C> where C: Christoffels  {
             .accel(add(self.vel, mul(dv3, dtau)));
 
         self.pos = add(self.pos, add(mul(add(dp1, dp4), dtau/6.0), mul(add(dp2, dp3), dtau/3.0)));
-        self.vel = add(self.vel, add(mul(add(dv1, dv4), dtau/6.0), mul(add(dv2, dv3), dtau/3.0)));
+        self.vel = add(self.vel, add(mul(add(dv1, dv4), dtau/6.0), mul(add(dv2, dv3), dtau/3.0)));*/
 
         // Check velocity
         if iteration % 0x100 == 0 {
@@ -112,16 +115,13 @@ impl<C> Photon<C> where C: Christoffels  {
 
 fn main() {
     let pos = [1.0, PI / 2.0, 0.0];// r, theta, phi
-    let mut plane: views::ViewPlane<metrics::Minkowski> = views::ViewPlane::<metrics::Minkowski>::new(
-        pos, [2.0, 0.0, 0.0], [0.0, 0.0, 1.0], 2, 1);
+
+    let mut plane: views::ViewLine<metrics::Minkowski3> = views::ViewLine::<metrics::Minkowski3>::new(
+        pos, [-2.0, 0.0, 0.0], [0.0, 0.0, 1.0], 640, 480);
     
     let dtau = 1e-3;
 
     plane.run(1_000_000, dtau);
-
-    for p in &plane.photons {
-        println!("Final pos: {:?}", p.pos);
-    }
 
     let skybox = skybox::Skybox::blank();
     let image = plane.render(skybox);
