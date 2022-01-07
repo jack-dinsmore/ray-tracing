@@ -117,15 +117,15 @@ fn main() {
     let pos = [10.0, PI / 2.0, 0.0];// r, theta, phi
 
     let mut plane: views::ViewLine<metrics::MorrisThorne3> = views::ViewLine::<metrics::MorrisThorne3>::new(
-        pos, [-2.0, 0.0, 0.0], [0.0, 0.0, 1.0], 640, 480);
+        pos, [-2.0, 0.0, 0.0], [0.0, 0.0, 1.0], 1920, 1080);
     
     let dtau = 1e-3;
 
     plane.run(1_000_000, dtau);
 
-    let skybox = skybox::Skybox::demo();
+    let skybox = skybox::Skybox::gas();
     let image = plane.render(skybox);
-    if let Err(_) = image.save("out.bmp") {
+    if let Err(_) = image.save("morris-thorne3.bmp") {
         println!("Image saving threw an error.");
     }
     println!("Success");
