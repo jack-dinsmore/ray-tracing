@@ -11,6 +11,7 @@ CORONA_ELECTRON_GAMMA = 1836.0 * CORONA_PROTON_GAMMA_MINUS_ONE
 RESCALE_FOR_XRAY = CORONA_ELECTRON_GAMMA * CORONA_ELECTRON_GAMMA
 
 X_RAY_WEIGHT = 10
+SMALL = False
 
 bk = 8.61733326e-5
 
@@ -23,7 +24,10 @@ plt.rcParams["text.usetex"] = True
 plt.rcParams["font.family"] = "serif"
 plt.rcParams["font.serif"] = "cm"
 
-figsize = (16, 9)
+if SMALL:
+    figsize = (8, 4.5)
+else:
+    figsize = (16, 9)
 FALLOFF_SIG = 1000.0
 
 def get_colormap(xray=False):
@@ -310,8 +314,7 @@ if __name__ == "__main__":
     process("thin", max_flux=high_flux, extra_name='bright-')
     process("schwarzschild", max_flux=low_flux)
     process("schwarzschild", max_flux=high_flux, extra_name='bright-')
+    together("schwarzschild", max_flux=90)
     process("kerr", max_flux=low_flux)
     process("kerr", max_flux=high_flux, extra_name='bright-')
-
-    together("schwarzschild", max_flux=90)
     together("kerr", max_flux=98)
