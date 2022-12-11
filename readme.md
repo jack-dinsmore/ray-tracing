@@ -10,7 +10,7 @@ Physics 360 Final Project. Stanford University.
 
 The purpose of this project is to generate images of a simple black hole system consisting of an accretion disk and a Compton-scattering corona. Images are generated for the X-ray and optical bands by numerically integrating the equations of motion of light from the observer to the source under the laws of General Relativity. This technique is called ray-tracing.
 
-For a description of the projects and a summary, see the **writeup** directory. For my final presentation, see **presentation**. Generated data is contained in the **data** directory and the code required to generate image from that data is in **imager.**
+For a description of the projects and a summary, see the **writeup** directory. For my final presentation, see **presentation**. Generated data is contained in the **data** directory and images of that data in the **imager** directory, along with the code required to generate images.
 
 Finally, the code to actually do the ray-tracing is in the **raytracer** directory. It is flexible enough to use any relativistic metric, though Minkowsky, Schwarzschild, Kerr, and Morris-Thorne are already implemented. Likewise, other sources of light may be added to the code by modifying the **source.rs** and **observer.rs** files. The code is written in Rust &mdash; a relativity recent programming language which is blazing fast and safer than any other alternative of the same performance (i.e., C and C++). The Rust documentation is phenomenal and you should definitely try the online [Rust book](https://doc.rust-lang.org/book/) if you would like to learn it. Experience with another type-safe language like C, C++, or Java is helpful, since Rust has a steep learning curve.
 
@@ -31,3 +31,6 @@ python image.py
 
 ### Dec 7
 Initial Commit. Original code moved to **old** directory. Added new code, data, and summary.
+
+### Dec 8
+Gave talk. Need to change density profile of the disk and corona and possibly change the colormap and not do redshifting anymore.

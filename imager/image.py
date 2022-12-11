@@ -10,24 +10,22 @@ CORONA_DENSITY_HEIGHT = 2.25 / CORONA_PROTON_GAMMA_MINUS_ONE
 CORONA_ELECTRON_GAMMA = 1836.0 * CORONA_PROTON_GAMMA_MINUS_ONE
 RESCALE_FOR_XRAY = CORONA_ELECTRON_GAMMA * CORONA_ELECTRON_GAMMA
 
-X_RAY_WEIGHT = 10
-SMALL = False
+X_RAY_WEIGHT = 12
+ENERGY_SCALE = 8.61733326e-5 * 4.96987546431
 
-bk = 8.61733326e-5
 
 def to_xray(arr):
     res = arr[[1,2,0],:,:]
     res[1,:,:] /= 2
     return res
 
+def get_figsize(small):
+    return (10.666, 6) if small else (16, 9)
+
 plt.rcParams["text.usetex"] = True
 plt.rcParams["font.family"] = "serif"
 plt.rcParams["font.serif"] = "cm"
 
-if SMALL:
-    figsize = (8, 4.5)
-else:
-    figsize = (16, 9)
 FALLOFF_SIG = 1000.0
 
 def get_colormap(xray=False):
@@ -191,14 +189,14 @@ def get_colormap(xray=False):
     plt.figure()
 
     if xray:
-        scale = RESCALE_FOR_XRAY/1000
+        scale = ENERGY_SCALE * RESCALE_FOR_XRAY/1000
     else:
-        scale = 1
+        scale = ENERGY_SCALE
 
-    c = plt.imshow([[min_temp * bk * scale, max_temp * bk * scale]], cmap=blue_green1)
+    c = plt.imshow([[min_temp * scale, max_temp * scale]], cmap=blue_green1)
     return c
 
-def process(tag, max_flux=100, extra_name=""):
+def process(tag, small, max_flux=100, extra_name=""):
     with open(f"../data/{tag}-optical.npy", 'rb') as f:
         optical = np.load(f)
 
@@ -227,7 +225,7 @@ def process(tag, max_flux=100, extra_name=""):
             for j in range(middle - REMOVE_POLE, middle + REMOVE_POLE + 1):
                 colors[i][:,j] = true_column
 
-    fig, ax = plt.subplots(figsize=figsize, frameon=False)
+    fig, ax = plt.subplots(figsize=get_figsize(small), frameon=False)
     ax.set_axis_off()
     ax.imshow(colors[0], vmin=0, vmax=1)
     axins = inset_axes(ax, width="20%", height="1.3%", loc='upper left', borderpad=1)
@@ -236,11 +234,12 @@ def process(tag, max_flux=100, extra_name=""):
     cbar.set_label("Optical Energy (eV)", color="white", usetex=True)
     plt.setp(cbar_xticks, color="white")
     ax.set_aspect("equal")
-    fig.savefig(f"../data/{tag}-{extra_name}optical.png", bbox_inches='tight', pad_inches=0)
-    fig.savefig(f"../data/{tag}-{extra_name}optical.pdf", bbox_inches='tight', pad_inches=0)
+    small_tag = "small" if small else "big"
+    fig.savefig(f"../imager/{small_tag}/{tag}-{extra_name}optical.png", bbox_inches='tight', pad_inches=0)
+    fig.savefig(f"../imager/{small_tag}/{tag}-{extra_name}optical.pdf", bbox_inches='tight', pad_inches=0)
 
     if np.nanmax(colors[1][np.isfinite(colors[1])]) > 1:
-        fig, ax = plt.subplots(figsize=figsize, frameon=False)
+        fig, ax = plt.subplots(figsize=get_figsize(small), frameon=False)
         ax.set_axis_off()
         ax.imshow(colors[1], vmin=0, vmax=1)
         axins = inset_axes(ax, width="20%", height="1.3%", loc='upper left', borderpad=1)
@@ -249,10 +248,10 @@ def process(tag, max_flux=100, extra_name=""):
         cbar.set_label("X-ray Energy (keV)", color="white", usetex=True)
         plt.setp(cbar_xticks, color="white")
         ax.set_aspect("equal")
-        fig.savefig(f"../data/{tag}-{extra_name}xray.png", bbox_inches='tight', pad_inches=0)
-        fig.savefig(f"../data/{tag}-{extra_name}xray.pdf", bbox_inches='tight', pad_inches=0)
+        fig.savefig(f"../imager/{small_tag}/{tag}-{extra_name}xray.png", bbox_inches='tight', pad_inches=0)
+        fig.savefig(f"../imager/{small_tag}/{tag}-{extra_name}xray.pdf", bbox_inches='tight', pad_inches=0)
 
-def together(tag, max_flux=100):
+def together(tag, small, max_flux=100):
     with open(f"../data/{tag}-optical.npy", 'rb') as f:
         optical = np.load(f)
 
@@ -281,7 +280,7 @@ def together(tag, max_flux=100):
         for j in range(middle - REMOVE_POLE, middle + REMOVE_POLE + 1):
                 colors[:,j] = true_column
 
-    fig, ax = plt.subplots(figsize=figsize, frameon=False)
+    fig, ax = plt.subplots(figsize=get_figsize(small), frameon=False)
     ax.set_axis_off()
     ax.imshow(colors, vmin=0, vmax=1)
 
@@ -298,23 +297,27 @@ def together(tag, max_flux=100):
     cbar.set_label("X-ray Energy (keV)", color="white", usetex=True)
     plt.setp(cbar_xticks, color="white")
 
+    small_tag = "small" if small else "big"
     ax.set_aspect("equal")
-    fig.savefig(f"../data/{tag}-tog.png", bbox_inches='tight', pad_inches=0)
-    fig.savefig(f"../data/{tag}-tog.pdf", bbox_inches='tight', pad_inches=0)
+    fig.savefig(f"../imager/{small_tag}/{tag}-tog.png", bbox_inches='tight', pad_inches=0)
+    fig.savefig(f"../imager/{small_tag}/{tag}-tog.pdf", bbox_inches='tight', pad_inches=0)
 
 
 if __name__ == "__main__":
     low_flux = 90
-    high_flux = 99.5
-    process("flat", max_flux=low_flux)
-    process("minkowski", max_flux=low_flux)
-    process("thick", max_flux=low_flux)
-    process("thick", max_flux=high_flux, extra_name='bright-')
-    process("thin", max_flux=low_flux)
-    process("thin", max_flux=high_flux, extra_name='bright-')
-    process("schwarzschild", max_flux=low_flux)
-    process("schwarzschild", max_flux=high_flux, extra_name='bright-')
-    together("schwarzschild", max_flux=90)
-    process("kerr", max_flux=low_flux)
-    process("kerr", max_flux=high_flux, extra_name='bright-')
-    together("kerr", max_flux=98)
+    high_flux = 100
+    for small in [True, False]:
+        process("flat", small, max_flux=low_flux)
+        
+        process("minkowski", small, max_flux=low_flux)
+
+        process("thick", small, max_flux=low_flux)
+
+        process("thin", small, max_flux=low_flux)
+
+        process("schwarzschild", small, max_flux=low_flux)
+        together("schwarzschild", small, max_flux=low_flux)
+
+        process("kerr", small, max_flux=low_flux)
+        process("kerr", small, max_flux=high_flux, extra_name='bright-')
+        together("kerr", small, max_flux=low_flux)

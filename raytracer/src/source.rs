@@ -1,4 +1,5 @@
 use crate::util::*;
+use crate::observer::IS_KERR;
 
 // Fix R_S at 1.
 const ALPHA: f64 = 500.0;
@@ -68,9 +69,16 @@ impl AccretionDisk {
         );
         let vel_redshift = (1.0 + dot3(disk_vel, light_3vel) / (1.0 - dot3(disk_vel, light_3vel))).sqrt();
         let depth = self.tau_scale * (pos[1]).powf(1.25) / light_3vel[2].abs();
-            
+
         let temp = self.temp_scale / pos[1].sqrt() * grav_redshift * vel_redshift / REDSHIFT;
-        let lum = self.lum_scale / (pos[1] * pos[1]);
+        let lum = if pos[1] < 3.0 && !IS_KERR {
+            // Inside ISCO
+            // Linear drop from self.lum_scale/9 to 0 at EH
+            self.lum_scale / 18.0 * (pos[1] - 1.0)
+        } else {
+            // Outside ISCO
+            self.lum_scale / (pos[1] * pos[1])
+        };
         (temp, lum, (-depth).exp())
     }
 

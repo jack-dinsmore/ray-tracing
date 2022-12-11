@@ -1,3 +1,6 @@
+#![allow(dead_code)]
+#![allow(non_snake_case)]
+
 mod metrics;
 mod observer;
 mod util;
@@ -71,10 +74,10 @@ fn kerr() {
 }
 
 fn main() {
-    flat();
-    mink();
-    thick();
-    thin();
-    sch();
+    // flat();
+    // mink();
+    // thick();
+    // thin();
+    // sch();
     kerr();
 }

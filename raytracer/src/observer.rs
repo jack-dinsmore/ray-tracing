@@ -9,6 +9,7 @@ pub const PHOTON_BATCH_SIZE: usize = 0x100;
 pub const CORONA_INTERACTION: usize = 0x08;
 const NUM_COVERS_PER: usize = 10; // 10
 const NUM_SLICES: usize = 7; // 7
+pub const IS_KERR: bool = true; // Determines whether to cut disk
 const LENGTH_SCALE: f64 = 0.9; // Decrease in size ratio for each rectangle of the image
 
 pub const WIDTH: usize = 16 * SIZE;
